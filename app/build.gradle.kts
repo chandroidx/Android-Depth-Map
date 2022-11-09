@@ -50,7 +50,7 @@ dependencies {
     Modules.DATA,
     Modules.DOMAIN,
     Modules.PRESENTATION,
-    Modules.PRESENTATION_SPLASH,
+    Modules.PRESENTATION_DEPTH,
   )
 
   implementation(

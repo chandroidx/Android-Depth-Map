@@ -14,7 +14,5 @@ object Modules {
   const val DOMAIN = ":domain"
   const val PRESENTATION = ":presentation"
 
-  const val PRESENTATION_SPLASH = ":presentation:splash"
-
-
+  const val PRESENTATION_DEPTH = ":presentation:depth"
 }

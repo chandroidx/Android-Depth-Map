@@ -16,7 +16,7 @@
             <option value="$PROJECT_DIR$/data" />
             <option value="$PROJECT_DIR$/domain" />
             <option value="$PROJECT_DIR$/presentation" />
-            <option value="$PROJECT_DIR$/presentation/splash" />
+            <option value="$PROJECT_DIR$/presentation/depth" />
             <option value="$PROJECT_DIR$/testUtils" />
             <option value="$PROJECT_DIR$/utility" />
           </set>

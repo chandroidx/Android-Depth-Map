@@ -14,6 +14,6 @@ listOf(
   ":utility",
   ":domain",
   ":presentation",
-  ":presentation:splash",
-  ":testUtils"
+  ":presentation:depth",
+  ":testUtils",
 ).forEach(::include)
