@@ -29,7 +29,7 @@ import kotlin.time.ExperimentalTime
 class SplashViewModelTest : UnitTest() {
   val setSample = mockk<SetSample>()
   val getSample = mockk<GetSample>()
-  var viewModel: SplashViewModel = SplashViewModel(setSample, getSample, UICoroutineScope())
+  var viewModel: DepthViewModel = DepthViewModel(setSample, getSample, UICoroutineScope())
 
   @BeforeEach
   fun setUp() {
@@ -67,8 +67,8 @@ class SplashViewModelTest : UnitTest() {
 
     advanceUntilIdle()
 
-    viewModel.splashEvent.test {
-      expectItem() `should equal` SplashViewModel.SplashState.Activate
+    viewModel.depthEvent.test {
+      expectItem() `should equal` DepthViewModel.SplashState.Activate
     }
   }
 }

@@ -21,7 +21,7 @@
       android:value="UnsafeGlideModule" />
 
     <activity
-      android:name="ai.deepfine.splash.view.SplashActivity"
+      android:name="ai.deepfine.splash.view.DepthActivity"
       android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />

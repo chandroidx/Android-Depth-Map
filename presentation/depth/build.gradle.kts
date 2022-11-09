@@ -15,5 +15,7 @@ android {
 dependencies {
   basePresentation()
 
+  implementation(Libraries.ArCore)
+
   configureTestImplements()
 }

@@ -6,7 +6,7 @@
 
     <variable
       name="viewModel"
-      type="ai.deepfine.splash.viewmodel.SplashViewModel" />
+      type="ai.deepfine.splash.viewmodel.DepthViewModel" />
   </data>
 
   <androidx.constraintlayout.widget.ConstraintLayout

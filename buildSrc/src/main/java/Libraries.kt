@@ -92,4 +92,6 @@ object Libraries {
       object AndroidTestRunner : LibraryGroupChild(group = JUnit5, name = "android-test-runner"), TestImplementable, Implementable
     }
   }
+
+  object ArCore : BaseLibrary(groupName = "com.google.ar", name = "core", version = "1.34.0"), Implementable
 }
