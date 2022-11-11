@@ -3,6 +3,7 @@
   package="ai.deepfine.androidBase">
 
   <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.CAMERA" />
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
   <application
@@ -16,13 +17,16 @@
     android:theme="@style/AppTheme"
     android:usesCleartextTraffic="true">
 
+    <meta-data android:name="com.google.ar.core" android:value="required" />
+
     <meta-data
       android:name="ai.deepfine.utility.network.UnSafeGlideModule"
       android:value="UnsafeGlideModule" />
 
     <activity
       android:name="ai.deepfine.splash.view.DepthActivity"
-      android:exported="true">
+      android:exported="true"
+      android:screenOrientation="locked">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />

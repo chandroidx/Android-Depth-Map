@@ -4,9 +4,13 @@ import ai.deepfine.presentation.base.BaseActivity
 import ai.deepfine.presentation.extensions.repeatOnStarted
 import ai.deepfine.splash.R
 import ai.deepfine.splash.databinding.ActivityDepthBinding
+import ai.deepfine.splash.util.ARCoreSessionLifecycleHelper
 import ai.deepfine.splash.util.DepthEvent
 import ai.deepfine.splash.viewmodel.DepthViewModel
 import androidx.activity.viewModels
+import com.google.ar.core.Config
+import com.google.ar.core.Session
+import com.google.ar.core.exceptions.*
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -18,6 +22,14 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class DepthActivity : BaseActivity<ActivityDepthBinding, DepthViewModel>(R.layout.activity_depth), DepthEvent.Observer {
   override val viewModel: DepthViewModel by viewModels()
+
+  val arCoreSessionHelper: ARCoreSessionLifecycleHelper by lazy {
+    ARCoreSessionLifecycleHelper(this)
+  }
+
+  private val renderer: ArRenderer by lazy {
+    ArRenderer(this, binding.glSurfaceView)
+  }
 
   //================================================================================================
   // Initialize
@@ -34,9 +46,40 @@ class DepthActivity : BaseActivity<ActivityDepthBinding, DepthViewModel>(R.layou
   }
 
   override fun initView() {
+    configureArCoreSessionHelper()
+    configureRenderer()
   }
 
   //================================================================================================
-  // Observe
+  // Functions
   //================================================================================================
+  private fun configureArCoreSessionHelper() {
+    arCoreSessionHelper.exceptionCallback = { exception ->
+      val message =
+        when (exception) {
+          is UnavailableUserDeclinedInstallationException ->
+            "Please install Google Play Services for AR"
+          is UnavailableApkTooOldException -> "Please update ARCore"
+          is UnavailableSdkTooOldException -> "Please update this app"
+          is UnavailableDeviceNotCompatibleException -> "This device does not support AR"
+          is CameraNotAvailableException -> "Camera not available. Try restarting the app."
+          else -> "Failed to create AR session: $exception"
+        }
+    }
+    arCoreSessionHelper.beforeSessionResume = ::configureSession
+    lifecycle.addObserver(arCoreSessionHelper)
+  }
+
+  private fun configureRenderer() {
+    lifecycle.addObserver(renderer)
+  }
+
+  private fun configureSession(session: Session) {
+    val config = session.config.apply {
+      depthMode = Config.DepthMode.AUTOMATIC
+      focusMode = Config.FocusMode.AUTO
+    }
+
+    session.configure(config)
+  }
 }
