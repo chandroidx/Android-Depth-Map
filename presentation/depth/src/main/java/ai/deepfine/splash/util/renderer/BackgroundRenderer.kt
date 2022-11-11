@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.opengl.GLES11Ext
 import android.opengl.GLES20
+import android.util.Size
 import com.google.ar.core.Coordinates2d
 import com.google.ar.core.Frame
 import java.nio.ByteBuffer
@@ -52,6 +53,8 @@ class BackgroundRenderer {
   private var depthQuadPositionParam by Delegates.notNull<Int>()
   private var depthQuadTexCoordParam by Delegates.notNull<Int>()
 
+  var surfaceSize: Size? = null
+
 
   fun createDepthShaders(context: Context, depthTextureId: Int) {
     val vertexShader = ShaderUtil.loadGLShader(
@@ -78,7 +81,7 @@ class BackgroundRenderer {
     this.depthTextureId = depthTextureId
   }
 
-  fun drawDepth(frame: Frame) {
+  fun drawDepth(frame: Frame, onBitmapRendered: (Bitmap?) -> Unit = {}) {
     if (frame.hasDisplayGeometryChanged()) {
       frame.transformCoordinates2d(
         Coordinates2d.OPENGL_NORMALIZED_DEVICE_COORDINATES,
@@ -113,18 +116,16 @@ class BackgroundRenderer {
 
     GLES20.glDepthMask(true)
 
-//    val bitmap = savePixels(width, height)
-//
-//    CoroutineScope(Dispatchers.IO).launch {
-//      bitmap?.saveAsFile(context, "Mask", "${frame.androidCameraTimestamp}_2.png", Bitmap.CompressFormat.PNG)
-//      bitmap?.recycle()
-//    }
+    onBitmapRendered(savePixels())
 
     GLES20.glEnable(GLES20.GL_DEPTH_TEST)
   }
 
-  private fun savePixels(width: Int, height: Int): Bitmap? {
-    if (width == 0 || height == 0) return null
+  private fun savePixels(): Bitmap? {
+    if (surfaceSize == null) return null
+
+    val width = surfaceSize!!.width
+    val height = surfaceSize!!.height
 
     val b = IntArray(width * height)
     val bt = IntArray(width * height)
@@ -191,7 +192,7 @@ class BackgroundRenderer {
     ShaderUtil.checkGLError("Program parameters")
   }
 
-  fun draw(frame: Frame) {
+  fun draw(frame: Frame, onBitmapRendered: (Bitmap?) -> Unit = {}) {
     if (frame.hasDisplayGeometryChanged()) {
       frame.transformCoordinates2d(
         Coordinates2d.OPENGL_NORMALIZED_DEVICE_COORDINATES,
@@ -237,13 +238,7 @@ class BackgroundRenderer {
     GLES20.glDepthMask(true)
     GLES20.glEnable(GLES20.GL_DEPTH_TEST)
 
-
-//    val bitmap = savePixels(width, height)
-
-//    CoroutineScope(Dispatchers.IO).launch {
-//      bitmap?.saveAsFile(context, "Origin", "${frame.androidCameraTimestamp}_1.png", Bitmap.CompressFormat.PNG)
-//      bitmap?.recycle()
-//    }
+    onBitmapRendered(savePixels())
 
     ShaderUtil.checkGLError("BackgroundRendererDraw")
   }

@@ -2,6 +2,8 @@ package ai.deepfine.androidBase.di
 
 import ai.deepfine.domain.repository.FileDownloadRepository
 import ai.deepfine.domain.repository.FileDownloadRepositoryImpl
+import ai.deepfine.domain.repository.FileSaveRepository
+import ai.deepfine.domain.repository.FileSaveRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -20,4 +22,9 @@ abstract class RepositoryModule {
   abstract fun bindFileDownloadRepository(
     fileDownloadRepositoryImpl: FileDownloadRepositoryImpl,
   ): FileDownloadRepository
+
+  @Binds
+  abstract fun bindFileSaveRepository(
+    fileSaveRepositoryImpl: FileSaveRepositoryImpl
+  ): FileSaveRepository
 }

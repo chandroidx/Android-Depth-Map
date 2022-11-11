@@ -1,24 +1,18 @@
 package ai.deepfine.splash.viewmodel
 
+import ai.deepfine.domain.usecase.download.SaveDepthImagePair
 import ai.deepfine.presentation.base.BaseViewModelImpl
 import ai.deepfine.presentation.coroutine.BaseCoroutineScope
 import ai.deepfine.splash.util.DepthEvent
-import ai.deepfine.utility.extensions.cameraManager
+import ai.deepfine.splash.util.DepthFrame
 import ai.deepfine.utility.utils.EventFlow
 import ai.deepfine.utility.utils.L
 import ai.deepfine.utility.utils.MutableEventFlow
 import ai.deepfine.utility.utils.asEventFlow
-import android.content.Context
-import android.hardware.camera2.CameraDevice
-import android.media.ImageReader
-import android.os.Handler
-import android.os.HandlerThread
-import com.google.ar.core.Config
-import com.google.ar.core.ImageFormat
-import com.google.ar.core.Session
-import com.google.ar.core.SharedCamera
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.EnumSet
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -29,6 +23,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class DepthViewModel @Inject constructor(
+  private val saveDepthImagePair: SaveDepthImagePair,
   scope: BaseCoroutineScope,
 ) : BaseViewModelImpl(), BaseCoroutineScope by scope {
 
@@ -39,13 +34,41 @@ class DepthViewModel @Inject constructor(
   val depthEvent: EventFlow<DepthEvent>
     get() = _depthEvent.asEventFlow()
 
+  private var isSaveRunning = false
+  private val frameQueue = ArrayDeque<DepthFrame>()
+
+  private var requiredFrame = 0
+  private var savedFrame = 0
+
+  fun addFrame(depthFrame: DepthFrame? = null) {
+    ++requiredFrame
+    depthFrame?.let(frameQueue::add)
+
+    if (!isSaveRunning) {
+      saveFrame()
+    }
+  }
+
+  private fun saveFrame() {
+    isSaveRunning = true
+
+    viewModelScope.launch {
+      withContext(ioDispatchers) {
+        val poppedFrame = frameQueue.removeFirstOrNull() ?: return@withContext
+        saveDepthImagePair.execute(SaveDepthImagePair.Params(poppedFrame.cameraBitmap, poppedFrame.depthBitmap, poppedFrame.timeStamp))
+          .collect {
+            L.d("PYC", "${++savedFrame} / ${requiredFrame}")
+            if (frameQueue.isEmpty()) {
+              isSaveRunning = false
+            } else {
+              saveFrame()
+            }
+          }
+      }
+    }
+  }
 
   override fun clearViewModel() {
     releaseCoroutine()
   }
-
-
-  //================================================================================================
-  // Companion
-  //================================================================================================
 }

@@ -72,6 +72,7 @@ class DepthActivity : BaseActivity<ActivityDepthBinding, DepthViewModel>(R.layou
 
   private fun configureRenderer() {
     lifecycle.addObserver(renderer)
+    renderer.saveBitmap = viewModel::addFrame
   }
 
   private fun configureSession(session: Session) {

@@ -24,4 +24,9 @@ abstract class DataSourceModule {
   abstract fun bindFileDownloadLocalDataSource(
     fileDownloadLocalDataSourceImpl: FileDownloadLocalDataSourceImpl,
   ): FileDownloadLocalDataSource
+
+  @Binds
+  abstract fun bindFileSaveDataSource(
+    fileSaveDataSourceImpl: FileSaveDataSourceImpl
+  ): FileSaveDataSource
 }

@@ -1,12 +1,16 @@
 package ai.deepfine.splash.view
 
+import ai.deepfine.splash.util.DepthFrame
 import ai.deepfine.splash.util.helper.DisplayRotationHelper
 import ai.deepfine.splash.util.renderer.BackgroundRenderer
 import ai.deepfine.splash.util.renderer.DepthTextureHandler
 import ai.deepfine.utility.utils.L
+import android.graphics.Bitmap
 import android.opengl.GLSurfaceView
+import android.util.Size
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.google.ar.core.TrackingState
 import java.io.IOException
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
@@ -52,6 +56,8 @@ class ArRenderer(private val activity: DepthActivity, glSurfaceView: GLSurfaceVi
 
   private var hasSetTextureNames = false
 
+  var saveBitmap: ((DepthFrame) -> Unit)? = null
+
   //================================================================================================
   // Lifecycle
   //================================================================================================
@@ -78,6 +84,7 @@ class ArRenderer(private val activity: DepthActivity, glSurfaceView: GLSurfaceVi
 
   override fun onSurfaceChanged(renderer: GL10?, width: Int, height: Int) {
     displayRotationHelper.onSurfaceChanged(width, height)
+    backgroundRenderer.surfaceSize = Size(width, height)
   }
 
   override fun onDrawFrame(p0: GL10?) {
@@ -98,8 +105,58 @@ class ArRenderer(private val activity: DepthActivity, glSurfaceView: GLSurfaceVi
       return
     }
 
-    backgroundRenderer.draw(frame)
-    depthTexture.update(frame)
-    backgroundRenderer.drawDepth(frame)
+    val camera = frame.camera
+
+    var cameraBitmap: Bitmap? = null
+    var depthBitmap: Bitmap? = null
+
+    backgroundRenderer.draw(frame) { bitmap ->
+      cameraBitmap = bitmap
+    }
+
+    if (camera.trackingState == TrackingState.TRACKING) {
+      depthTexture.update(frame)
+      backgroundRenderer.drawDepth(frame) { bitmap ->
+        depthBitmap = bitmap
+      }
+    }
+
+    compareAndSaveBitmaps(cameraBitmap, depthBitmap, frame.androidCameraTimestamp)
+  }
+
+  private fun compareAndSaveBitmaps(cameraBitmap: Bitmap?, depthBitmap: Bitmap?, timeStamp: Long) {
+    if (cameraBitmap == null || depthBitmap == null) {
+      cameraBitmap?.recycle()
+      depthBitmap?.recycle()
+      return
+    }
+
+    saveBitmap?.invoke(DepthFrame(cameraBitmap.resizeTo(300), depthBitmap.resizeTo(300), timeStamp))
+  }
+
+  private fun Bitmap.resizeTo(maxSize: Int): Bitmap {
+    val newWidth: Int
+    val newHeight: Int
+    val rate: Float
+
+    if (width > height) {
+      if (maxSize < width) {
+        rate = maxSize / width.toFloat()
+        newHeight = (height * rate).toInt()
+        newWidth = maxSize
+      } else {
+        return this
+      }
+    } else {
+      if (maxSize < height) {
+        rate = maxSize / height.toFloat()
+        newWidth = (width * rate).toInt()
+        newHeight = maxSize
+      } else {
+        return this
+      }
+    }
+
+    return Bitmap.createScaledBitmap(this, newWidth, newHeight, true)
   }
 }
