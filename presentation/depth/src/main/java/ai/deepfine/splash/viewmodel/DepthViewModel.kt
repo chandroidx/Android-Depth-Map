@@ -6,13 +6,11 @@ import ai.deepfine.presentation.coroutine.BaseCoroutineScope
 import ai.deepfine.splash.util.DepthEvent
 import ai.deepfine.splash.util.DepthFrame
 import ai.deepfine.utility.utils.EventFlow
-import ai.deepfine.utility.utils.L
 import ai.deepfine.utility.utils.MutableEventFlow
 import ai.deepfine.utility.utils.asEventFlow
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
@@ -37,11 +35,7 @@ class DepthViewModel @Inject constructor(
   private var isSaveRunning = false
   private val frameQueue = ArrayDeque<DepthFrame>()
 
-  private var requiredFrame = 0
-  private var savedFrame = 0
-
   fun addFrame(depthFrame: DepthFrame? = null) {
-    ++requiredFrame
     depthFrame?.let(frameQueue::add)
 
     if (!isSaveRunning) {
@@ -53,18 +47,15 @@ class DepthViewModel @Inject constructor(
     isSaveRunning = true
 
     viewModelScope.launch {
-      withContext(ioDispatchers) {
-        val poppedFrame = frameQueue.removeFirstOrNull() ?: return@withContext
-        saveDepthImagePair.execute(SaveDepthImagePair.Params(poppedFrame.cameraBitmap, poppedFrame.depthBitmap, poppedFrame.timeStamp))
-          .collect {
-            L.d("PYC", "${++savedFrame} / ${requiredFrame}")
-            if (frameQueue.isEmpty()) {
-              isSaveRunning = false
-            } else {
-              saveFrame()
-            }
+      val frameForSave = frameQueue.removeFirstOrNull() ?: return@launch
+      saveDepthImagePair.execute(SaveDepthImagePair.Params(frameForSave.cameraBitmap, frameForSave.depthBitmap, frameForSave.timeStamp))
+        .collect {
+          if (frameQueue.isEmpty()) {
+            isSaveRunning = false
+          } else {
+            saveFrame()
           }
-      }
+        }
     }
   }
 

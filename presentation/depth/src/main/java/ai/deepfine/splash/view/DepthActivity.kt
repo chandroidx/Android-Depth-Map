@@ -2,6 +2,7 @@ package ai.deepfine.splash.view
 
 import ai.deepfine.presentation.base.BaseActivity
 import ai.deepfine.presentation.extensions.repeatOnStarted
+import ai.deepfine.presentation.extensions.showToast
 import ai.deepfine.splash.R
 import ai.deepfine.splash.databinding.ActivityDepthBinding
 import ai.deepfine.splash.util.ARCoreSessionLifecycleHelper
@@ -51,21 +52,26 @@ class DepthActivity : BaseActivity<ActivityDepthBinding, DepthViewModel>(R.layou
   }
 
   //================================================================================================
+  // Observe
+  //================================================================================================
+  private fun observeArCoreSessionException(exception: Exception) {
+    val message = when (exception) {
+      is UnavailableUserDeclinedInstallationException -> "Please install Google Play Services for AR"
+      is UnavailableApkTooOldException -> "Please update ARCore"
+      is UnavailableSdkTooOldException -> "Please update this app"
+      is UnavailableDeviceNotCompatibleException -> "This device does not support AR"
+      is CameraNotAvailableException -> "Camera not available. Try restarting the app."
+      else -> "Failed to create AR session: $exception"
+    }
+
+    showToast(message)
+  }
+
+  //================================================================================================
   // Functions
   //================================================================================================
   private fun configureArCoreSessionHelper() {
-    arCoreSessionHelper.exceptionCallback = { exception ->
-      val message =
-        when (exception) {
-          is UnavailableUserDeclinedInstallationException ->
-            "Please install Google Play Services for AR"
-          is UnavailableApkTooOldException -> "Please update ARCore"
-          is UnavailableSdkTooOldException -> "Please update this app"
-          is UnavailableDeviceNotCompatibleException -> "This device does not support AR"
-          is CameraNotAvailableException -> "Camera not available. Try restarting the app."
-          else -> "Failed to create AR session: $exception"
-        }
-    }
+    arCoreSessionHelper.exceptionCallback = ::observeArCoreSessionException
     arCoreSessionHelper.beforeSessionResume = ::configureSession
     lifecycle.addObserver(arCoreSessionHelper)
   }
