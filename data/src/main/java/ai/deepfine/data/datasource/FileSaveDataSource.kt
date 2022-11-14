@@ -27,7 +27,7 @@ class FileSaveDataSourceImpl @Inject constructor() : FileSaveDataSource {
     }
 
     FileOutputStream(file).use { outputStream ->
-      bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+      bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
     }
 
     bitmap.recycle()

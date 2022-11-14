@@ -24,8 +24,8 @@ class FileSaveRepositoryImpl @Inject constructor(
   private val dataSource: FileSaveDataSource
 ) : FileSaveRepository {
   override suspend fun saveDepthImagePair(cameraBitmap: Bitmap, depthBitmap: Bitmap, timeStamp: Long): Flow<Unit> {
-    val cameraFile = File(context.getExternalFilesDir(CAMERA_FILE_DIR), "${timeStamp}_1.png")
-    val depthFile = File(context.getExternalFilesDir(DEPTH_FILE_DIR), "${timeStamp}_2.png")
+    val cameraFile = File(context.getExternalFilesDir(CAMERA_FILE_DIR), "${timeStamp}_1.jpeg")
+    val depthFile = File(context.getExternalFilesDir(DEPTH_FILE_DIR), "${timeStamp}_2.jpeg")
 
     val saveCameraBitmap = dataSource.saveBitmapImage(cameraBitmap, cameraFile)
     val saveDepthBitmap = dataSource.saveBitmapImage(depthBitmap, depthFile)

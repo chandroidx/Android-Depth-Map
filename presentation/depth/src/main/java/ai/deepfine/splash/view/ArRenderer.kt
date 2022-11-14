@@ -6,6 +6,7 @@ import ai.deepfine.splash.util.renderer.BackgroundRenderer
 import ai.deepfine.splash.util.renderer.DepthTextureHandler
 import ai.deepfine.utility.utils.L
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.opengl.GLSurfaceView
 import android.util.Size
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -131,7 +132,7 @@ class ArRenderer(private val activity: DepthActivity, glSurfaceView: GLSurfaceVi
       return
     }
 
-    saveBitmap?.invoke(DepthFrame(cameraBitmap.resizeTo(300), depthBitmap.resizeTo(300), timeStamp))
+    saveBitmap?.invoke(DepthFrame(cameraBitmap.resize(480, 640), depthBitmap.resize(480, 640), timeStamp))
   }
 
   private fun Bitmap.resizeTo(maxSize: Int): Bitmap {
@@ -158,5 +159,15 @@ class ArRenderer(private val activity: DepthActivity, glSurfaceView: GLSurfaceVi
     }
 
     return Bitmap.createScaledBitmap(this, newWidth, newHeight, true)
+  }
+
+  fun Bitmap.resize(newWidth: Int, newHeight: Int): Bitmap {
+    val scaledWidth = newWidth.toFloat() / width
+    val scaledHeight = newHeight.toFloat() / height
+
+    val matrix = Matrix()
+    matrix.postScale(scaledWidth, scaledHeight)
+
+    return Bitmap.createBitmap(this, 0, 0, width, height, matrix, false)
   }
 }
