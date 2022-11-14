@@ -67,5 +67,4 @@ class ARCoreSessionLifecycleHelper(
     session?.close()
     session = null
   }
-
 }

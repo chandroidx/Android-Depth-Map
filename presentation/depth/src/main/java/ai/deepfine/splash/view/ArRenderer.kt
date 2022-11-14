@@ -76,7 +76,6 @@ class ArRenderer(private val activity: DepthActivity, glSurfaceView: GLSurfaceVi
       depthTexture.createOnGlThread()
       backgroundRenderer.createOnGlThread(activity)
       backgroundRenderer.createDepthShaders(activity, depthTexture.depthTexture)
-
     } catch (e: IOException) {
       e.printStackTrace()
       L.e("Failed to read a required asset file")

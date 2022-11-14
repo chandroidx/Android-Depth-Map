@@ -33,7 +33,6 @@ fun File.toMultipartBody(param: String): MultipartBody.Part =
     asRequestBody((mimeType ?: "multipart/form-data").toMediaTypeOrNull())
   )
 
-
 fun File.moveTo(newFile: File) {
   FileInputStream(this).use { `in` ->
     FileOutputStream(newFile).use { out ->

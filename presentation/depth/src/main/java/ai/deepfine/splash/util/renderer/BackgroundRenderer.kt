@@ -55,7 +55,6 @@ class BackgroundRenderer {
 
   var surfaceSize: Size? = null
 
-
   fun createDepthShaders(context: Context, depthTextureId: Int) {
     val vertexShader = ShaderUtil.loadGLShader(
       context, GLES20.GL_VERTEX_SHADER, DEPTH_VERTEX_SHADER_NAME
@@ -103,7 +102,6 @@ class BackgroundRenderer {
     GLES20.glUseProgram(depthProgram)
     GLES20.glUniform1i(depthTextureParam, 0)
 
-
     GLES20.glVertexAttribPointer(depthQuadPositionParam, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, quadCoords)
     GLES20.glVertexAttribPointer(depthQuadTexCoordParam, TEXCOORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, quadTexCoords)
 
@@ -112,7 +110,6 @@ class BackgroundRenderer {
     GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4)
     GLES20.glDisableVertexAttribArray(depthQuadPositionParam)
     GLES20.glDisableVertexAttribArray(depthQuadTexCoordParam)
-
 
     GLES20.glDepthMask(true)
 
@@ -133,7 +130,6 @@ class BackgroundRenderer {
     val intBuffer = IntBuffer.wrap(b)
     intBuffer.position(0)
     GLES20.glReadPixels(0, 0, width, height, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, intBuffer)
-
 
     var i = 0
     var k = 0
